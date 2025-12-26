@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResumeMagic - Resume Generator</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-content">
+        <p class="eyebrow">ResumeMagic · Resume Generator MVP</p>
+        <h1>One conversation, infinite resume possibilities.</h1>
+        <p class="subtitle">
+          Generate ATS-ready resumes tailored for 50+ countries with dynamic formatting and
+          export-ready PDF/DOCX outputs.
+        </p>
+      </div>
+      <div class="hero-card">
+        <div>
+          <h2>✓ Your Resume is Ready</h2>
+          <p class="muted">ATS compatibility score</p>
+          <div class="score" id="heroScore">89</div>
+        </div>
+        <button class="primary">Download PDF</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <h3>Build your resume</h3>
+        <ol class="steps" id="stepList"></ol>
+        <div class="card">
+          <h4>Progress snapshot</h4>
+          <p id="progressSummary">0% complete</p>
+          <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="form-area">
+        <form id="resumeForm">
+          <div class="form-step" data-step="0">
+            <h2>Market Selection</h2>
+            <p>Select your target markets to customize format and section ordering.</p>
+            <div class="market-grid">
+              <div>
+                <div class="preset-row">
+                  <button type="button" class="chip" data-preset="english">
+                    English-speaking markets
+                  </button>
+                  <button type="button" class="chip" data-preset="tech">
+                    Tech-focused markets
+                  </button>
+                  <button type="button" class="chip" data-preset="eu">EU markets</button>
+                </div>
+                <div class="pill-group" id="countryOptions">
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="United States" />
+                    United States
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="India" />
+                    India
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="Germany" />
+                    Germany
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="United Kingdom" />
+                    United Kingdom
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="Canada" />
+                    Canada
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="Australia" />
+                    Australia
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="France" />
+                    France
+                  </label>
+                  <label class="pill">
+                    <input type="checkbox" name="targetCountries" value="UAE" />
+                    UAE
+                  </label>
+                </div>
+                <label class="field">
+                  Search countries
+                  <input
+                    type="text"
+                    name="countrySearch"
+                    placeholder="Type to search"
+                    id="countrySearch"
+                  />
+                </label>
+              </div>
+              <div class="map-card">
+                <h4>World map preview</h4>
+                <p class="muted">
+                  Highlights resume conventions for selected regions.
+                </p>
+                <div class="map-placeholder">
+                  <span>Interactive map</span>
+                </div>
+                <div class="market-notes" id="marketNotes">
+                  Select markets to see formatting guidance.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="1">
+            <h2>Quick Profile</h2>
+            <div class="grid">
+              <label class="field">
+                Current job title
+                <input type="text" name="currentJobTitle" placeholder="Product Manager" required />
+              </label>
+              <label class="field">
+                Years of experience
+                <input type="number" name="yearsOfExperience" min="0" max="70" placeholder="5" />
+              </label>
+              <label class="field">
+                Target industry
+                <input type="text" name="targetIndustry" placeholder="Tech, Finance, Healthcare" />
+              </label>
+              <label class="field toggle">
+                <span>Recent graduate?</span>
+                <input type="checkbox" name="isRecentGraduate" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="2">
+            <h2>Professional Experience</h2>
+            <p>Add your most recent roles first.</p>
+            <div id="experienceList" class="entry-list"></div>
+            <button type="button" class="secondary" id="addExperience">Add another job</button>
+          </div>
+
+          <div class="form-step" data-step="3">
+            <h2>Education</h2>
+            <div id="educationList" class="entry-list"></div>
+            <button type="button" class="secondary" id="addEducation">Add another degree</button>
+          </div>
+
+          <div class="form-step" data-step="4">
+            <h2>Skills & Certifications</h2>
+            <div class="grid">
+              <label class="field">
+                Technical skills
+                <input type="text" name="technicalSkills" placeholder="Python, SQL, Tableau" />
+              </label>
+              <label class="field">
+                Soft skills
+                <input type="text" name="softSkills" placeholder="Leadership, Communication" />
+              </label>
+              <label class="field">
+                Certifications
+                <input type="text" name="certifications" placeholder="AWS Certified Solutions Architect" />
+              </label>
+              <label class="field">
+                Languages
+                <input type="text" name="languages" placeholder="English (Native), German (Professional)" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-step" data-step="5">
+            <h2>Resume Settings</h2>
+            <div class="grid">
+              <div class="field-group">
+                <p class="label">Page length</p>
+                <div class="segmented">
+                  <label>
+                    <input type="radio" name="pageLength" value="1" checked />
+                    1 Page
+                  </label>
+                  <label>
+                    <input type="radio" name="pageLength" value="2" />
+                    2 Pages
+                  </label>
+                </div>
+                <p class="helper">Font and spacing adjust automatically.</p>
+              </div>
+              <div class="field-group">
+                <p class="label">Export format</p>
+                <div class="segmented">
+                  <label>
+                    <input type="radio" name="exportFormat" value="both" checked />
+                    PDF + DOCX
+                  </label>
+                  <label>
+                    <input type="radio" name="exportFormat" value="pdf" />
+                    PDF only
+                  </label>
+                  <label>
+                    <input type="radio" name="exportFormat" value="docx" />
+                    DOCX only
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="template-grid">
+              <label class="template-card">
+                <input type="radio" name="template" value="ats" checked />
+                <div>
+                  <h4>ATS-Optimized</h4>
+                  <p>Minimal layout with maximum ATS compatibility.</p>
+                </div>
+              </label>
+              <label class="template-card">
+                <input type="radio" name="template" value="modern" />
+                <div>
+                  <h4>Modern</h4>
+                  <p>Subtle color accents with a sidebar skills column.</p>
+                </div>
+              </label>
+              <label class="template-card">
+                <input type="radio" name="template" value="classic" />
+                <div>
+                  <h4>Classic</h4>
+                  <p>Traditional formatting for conservative industries.</p>
+                </div>
+              </label>
+              <label class="template-card">
+                <input type="radio" name="template" value="minimal" />
+                <div>
+                  <h4>Minimal</h4>
+                  <p>Clean typography with generous whitespace.</p>
+                </div>
+              </label>
+            </div>
+            <div class="notice">
+              ResumeMagic automatically adjusts font size, spacing, and section order based on
+              your selected markets.
+            </div>
+          </div>
+
+          <div class="form-step" data-step="6">
+            <h2>Your Resume is Ready!</h2>
+            <p class="muted">
+              Preview the summary and download your tailored resume files.
+            </p>
+            <div class="ready-grid">
+              <div class="preview" id="resumePreview"></div>
+              <div class="download-panel">
+                <div class="score-card">
+                  <p class="muted">ATS Compatibility Score</p>
+                  <div class="score-ring">
+                    <span id="atsScoreLarge">89</span>
+                  </div>
+                  <p id="atsStatus">Parsing test passed.</p>
+                </div>
+                <div class="stats-list">
+                  <div>
+                    <p class="muted">Resume length</p>
+                    <strong id="previewLength">1 page</strong>
+                  </div>
+                  <div>
+                    <p class="muted">Jobs & achievements</p>
+                    <strong id="previewJobs">0 jobs</strong>
+                  </div>
+                  <div>
+                    <p class="muted">Skills listed</p>
+                    <strong id="previewSkills">0 skills</strong>
+                  </div>
+                </div>
+                <div class="download-actions">
+                  <button type="button" class="primary">Download PDF</button>
+                  <button type="button" class="secondary">Download DOCX</button>
+                </div>
+                <div class="share-actions">
+                  <button type="button" class="ghost">Copy resume link</button>
+                  <button type="button" class="ghost">Email to myself</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="navigation">
+            <button type="button" class="ghost" id="backBtn">Back</button>
+            <button type="button" class="primary" id="nextBtn">Next</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <section class="insights">
+      <div>
+        <h3>ATS Compatibility Check</h3>
+        <p id="atsSummary">Add details to see your score.</p>
+      </div>
+      <div class="stats">
+        <div>
+          <p class="muted">Resume length</p>
+          <strong id="resumeLength">1 page</strong>
+        </div>
+        <div>
+          <p class="muted">Jobs captured</p>
+          <strong id="jobCount">0</strong>
+        </div>
+        <div>
+          <p class="muted">Skills listed</p>
+          <strong id="skillsCount">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
