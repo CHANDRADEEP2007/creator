@@ -43,7 +43,7 @@ const defaultState = {
     targetIndustry: "",
     isRecentGraduate: false,
   },
-  targetCountries: [],
+  targetCountry: "",
   experience: [],
   education: [],
   skills: {
@@ -275,14 +275,13 @@ function bindFormFields() {
       saveState();
     });
 
-  document.querySelectorAll("input[name='targetCountries']").forEach((input) => {
-    input.addEventListener("change", () => {
-      const selected = Array.from(
-        document.querySelectorAll("input[name='targetCountries']:checked")
-      ).map((item) => item.value);
-      state.targetCountries = selected;
-      updatePreview();
-      saveState();
+  document.querySelectorAll("input[name='targetCountry']").forEach((input) => {
+    input.addEventListener("change", (event) => {
+      if (event.target.checked) {
+        state.targetCountry = event.target.value;
+        updatePreview();
+        saveState();
+      }
     });
   });
 
@@ -389,21 +388,101 @@ function updatePreview() {
       ? "Parsing test passed."
       : "Add more experience, education, or skills.";
 
-  const countryLabel = state.targetCountries.length
-    ? state.targetCountries.join(", ")
-    : "No markets selected";
+  const countryLabel = state.targetCountry || "No markets selected";
+  const safeTitle = escapeHtml(state.profile.currentJobTitle || "Your Job Title");
+  const safeIndustry = escapeHtml(state.profile.targetIndustry || "Target industry");
+  const summaryDetails = [
+    state.profile.yearsOfExperience
+      ? `${escapeHtml(state.profile.yearsOfExperience)}+ years of experience`
+      : "Experience details pending",
+    state.profile.isRecentGraduate ? "Recent graduate" : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const experiencePreview = jobs.length
+    ? jobs
+        .map((entry) => {
+          const company = escapeHtml(entry.company || "Company");
+          const title = escapeHtml(entry.title || "Role");
+          const dates = [entry.start, entry.end].filter(Boolean).join(" → ");
+          const achievements = escapeHtml(entry.achievements || "Key achievements here.");
+          return `
+            <li>
+              <div class="preview-item">
+                <div>
+                  <strong>${title}</strong>
+                  <span>${company}</span>
+                </div>
+                <span>${escapeHtml(dates || "Dates")}</span>
+              </div>
+              <p>${achievements}</p>
+            </li>
+          `;
+        })
+        .join("")
+    : `<li class="placeholder">Add roles to see experience highlights.</li>`;
+
+  const educationPreview = state.education.length
+    ? state.education
+        .map((entry) => {
+          const institution = escapeHtml(entry.institution || "Institution");
+          const degree = escapeHtml(entry.degree || "Degree");
+          const field = escapeHtml(entry.field || "Field");
+          const graduation = escapeHtml(entry.graduation || "Graduation date");
+          const honors = escapeHtml(entry.honors || "Honors / coursework");
+          return `
+            <li>
+              <div class="preview-item">
+                <div>
+                  <strong>${degree}</strong>
+                  <span>${institution}</span>
+                </div>
+                <span>${graduation}</span>
+              </div>
+              <p>${field} · ${honors}</p>
+            </li>
+          `;
+        })
+        .join("")
+    : `<li class="placeholder">Add education details to complete this section.</li>`;
+
+  const skillsPreview = skills.length
+    ? skills.map((skill) => `<span class="skill-pill">${escapeHtml(skill)}</span>`).join("")
+    : `<span class="placeholder">Add skills to enhance ATS performance.</span>`;
 
   resumePreview.innerHTML = `
-    <h4>${state.profile.currentJobTitle || "Your Job Title"}</h4>
-    <p><strong>Target Markets:</strong> ${countryLabel}</p>
-    <p><strong>Experience:</strong> ${jobs.length} roles captured</p>
-    <p><strong>Education:</strong> ${state.education.length} entries</p>
-    <p><strong>Skills:</strong> ${skills.join(", ") || "Add skills to enhance ATS"}</p>
-    <p><strong>Template:</strong> ${state.settings.template}</p>
-    <p><strong>Export:</strong> ${formatExportLabel(state.settings.exportFormat)}</p>
+    <div class="preview-header">
+      <div>
+        <h4>${safeTitle}</h4>
+        <p class="preview-meta">${safeIndustry}</p>
+        <p class="preview-meta"><strong>Target Market:</strong> ${escapeHtml(countryLabel)}</p>
+      </div>
+      <div class="preview-badge">${escapeHtml(state.settings.template)}</div>
+    </div>
+    <div class="preview-section">
+      <h5>Professional Summary</h5>
+      <p>${summaryDetails || "Share your experience to build a summary."}</p>
+    </div>
+    <div class="preview-section">
+      <h5>Experience</h5>
+      <ul class="preview-list">${experiencePreview}</ul>
+    </div>
+    <div class="preview-section">
+      <h5>Education</h5>
+      <ul class="preview-list">${educationPreview}</ul>
+    </div>
+    <div class="preview-section">
+      <h5>Skills</h5>
+      <div class="skills-row">${skillsPreview}</div>
+    </div>
+    <div class="preview-section">
+      <h5>Export Settings</h5>
+      <p>${resumeLength.textContent} · ${formatExportLabel(state.settings.exportFormat)}</p>
+    </div>
   `;
 
-  marketNotes.textContent = buildMarketNotes(state.targetCountries);
+  marketNotes.textContent = buildMarketNotes(state.targetCountry);
 }
 
 function calculateAtsScore(jobCountValue, educationCount, skillsTotal) {
@@ -420,7 +499,7 @@ function calculateAtsScore(jobCountValue, educationCount, skillsTotal) {
   if (state.profile.currentJobTitle) {
     score += 5;
   }
-  if (state.targetCountries.length > 0) {
+  if (state.targetCountry) {
     score += 5;
   }
   return Math.min(score, 100);
@@ -433,11 +512,11 @@ function applyPreset(preset) {
     eu: ["Germany", "France", "United Kingdom"],
   };
 
-  const selected = presets[preset] || [];
-  document.querySelectorAll("input[name='targetCountries']").forEach((input) => {
-    input.checked = selected.includes(input.value);
+  const selected = presets[preset]?.[0] || "";
+  document.querySelectorAll("input[name='targetCountry']").forEach((input) => {
+    input.checked = input.value === selected;
   });
-  state.targetCountries = selected;
+  state.targetCountry = selected;
 }
 
 function filterCountries(query) {
@@ -449,18 +528,18 @@ function filterCountries(query) {
   });
 }
 
-function buildMarketNotes(selectedCountries) {
-  if (!selectedCountries.length) {
-    return "Select markets to see formatting guidance.";
+function buildMarketNotes(selectedCountry) {
+  if (!selectedCountry) {
+    return "Select a market to see formatting guidance.";
   }
 
-  if (selectedCountries.includes("United States")) {
+  if (selectedCountry === "United States") {
     return "US resumes highlight quantified impact and recent achievements.";
   }
-  if (selectedCountries.includes("Germany") || selectedCountries.includes("France")) {
+  if (["Germany", "France"].includes(selectedCountry)) {
     return "EU resumes emphasize certifications, dates, and optional personal details.";
   }
-  if (selectedCountries.includes("India")) {
+  if (selectedCountry === "India") {
     return "India resumes elevate education, GPA, and certifications.";
   }
   return "Mix market conventions by balancing achievements with formal credentials.";
@@ -473,6 +552,15 @@ function formatExportLabel(format) {
   return format.toUpperCase();
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function hydrateForm() {
   document.querySelector("input[name='currentJobTitle']").value =
     state.profile.currentJobTitle;
@@ -483,8 +571,8 @@ function hydrateForm() {
   document.querySelector("input[name='isRecentGraduate']").checked =
     state.profile.isRecentGraduate;
 
-  document.querySelectorAll("input[name='targetCountries']").forEach((input) => {
-    input.checked = state.targetCountries.includes(input.value);
+  document.querySelectorAll("input[name='targetCountry']").forEach((input) => {
+    input.checked = state.targetCountry === input.value;
   });
 
   document.querySelector("input[name='technicalSkills']").value = state.skills.technical;
